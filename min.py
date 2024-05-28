@@ -22,17 +22,18 @@ class Min:
         self.inner_frame = Frame(canvas)
         canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
-        self.input=input.ProblemInput(2,self.inner_frame,NORMAL,MAYOR_QUE)
+        self.input=input.ProblemInput(2,self.inner_frame,"readonly",MAYOR_QUE)
         self.foot_frame=Frame(self.gui_sum_menu_dim)
         self.foot_frame.pack()
         self.num_fase=1
         self.c_add=0
         self.c_artificial=0
-        self.cabecera=[]
+        self.cabecera=None
         Button(self.foot_frame, text="Resolver",command=self.collect_data ).grid(row=1, column=1)
     def collect_data(self):
         self.funcion_objetivo = self.input.get_fo_value()
         self.restricciones = self.input.get_restriction_values()
+        self.num_fase=1
         self.set_default_cabecera()
         self.parse_fo_data_cabecera()
         self.matriz_xi,self.matriz_aumentada=self.parse_restriccion()
@@ -86,6 +87,7 @@ class Min:
         
         
     def set_default_cabecera(self):
+        self.cabecera=[]
         for i in range(len(self.funcion_objetivo)):
             self.cabecera.append([0, f"X{i+1}"])
     def set_segunda_fase_cabecera(self):
@@ -96,6 +98,7 @@ class Min:
             segunda_cabecera.append([0,f"S{i+1}"])
         return segunda_cabecera
     def parse_fo_data_cabecera(self):#genera la cabecera
+        
         c_olgura=0
         c_artificial=0
         for i in range(len(self.restricciones)):
@@ -134,6 +137,9 @@ class Min:
         self.frame_menu_sum = Frame(self.salida, highlightbackground='red', highlightthickness=1)
         self.frame_menu_sum.pack(fill='both', expand=True, padx=5, pady=5)
         Label(self.frame_menu_sum, text="Resultado :", font=('arial', 10, 'bold')).pack()
+        fase1 = Frame(self.salida, highlightbackground='red', highlightthickness=1)
+        fase1.pack(fill='both', expand=True, padx=5, pady=5)
+        Label(fase1, text="Fase 1 :", font=('arial', 10, 'bold')).pack()
         self.simplex_operation(self.salida,self.cabecera,self.matriz_aumentada,self.matriz_xi)
 
     def formatear_numero(self,numero) -> str:
@@ -147,7 +153,9 @@ class Min:
             return str(numero) 
         
     def simplex_operation(self,wind,cabecera, cuerpo_restricciones, matriz_xi):
+        c_iteration=0
         while True:
+            c_iteration+=1
             fila_z=[]
             fila_c_z=[]
             columna_bj_xi=[]
@@ -165,9 +173,9 @@ class Min:
             min_c_z=min(fila_c_z)
             if(min_c_z>=0):
                 #imprime ultima tabla
-                self.write_table(wind, cabecera, cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,[ [item] for item in columna_bj_xi if item is not None],fila_pivote,columna_pivote)
+                self.write_table(wind, cabecera, cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,[ [item] for item in columna_bj_xi if item is not None],fila_pivote,columna_pivote,c_iteration)
                 self.num_fase+=1
-                if self.num_fase == 2:
+                if self.num_fase == 2: 
                     self.segunda_fase(cuerpo_restricciones, matriz_xi)
                 break
             columna_pivote=fila_c_z.index(min_c_z)+1
@@ -187,9 +195,9 @@ class Min:
             fila_pivote = columna_bj_xi.index(menor_bj_xi) 
             pivote_multiplo=1/cuerpo_restricciones[fila_pivote][columna_pivote]
 
-            self.write_table(wind, cabecera, cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,[ [item] for item in columna_bj_xi],fila_pivote,columna_pivote)
+            self.write_table(wind, cabecera, cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,[ [item] for item in columna_bj_xi],fila_pivote,columna_pivote,c_iteration)
 
-            for i in range(len(cuerpo_restricciones[fila_pivote])):#esto se puede separar a una funcion/vuelve uni al pivote
+            for i in range(len(cuerpo_restricciones[fila_pivote])):#vuelve uno al pivote
                 cuerpo_restricciones[fila_pivote][i]*=pivote_multiplo
             columna_pivote_temporal=[row[columna_pivote] for row in cuerpo_restricciones]#alamacenamos ya que se volvera 0 en nuestra matriz
             for i in range(num_filas):
@@ -197,10 +205,9 @@ class Min:
                     for j in range(num_columns):#vuelve 0 las los elementos de la columan que no son pivote
                         cuerpo_restricciones[i][j]-=columna_pivote_temporal[i]*cuerpo_restricciones[fila_pivote][j]
             
-            #matriz_xi[fila_pivote]=[c_fo_cabecera[columna_pivote-1],f'x{columna_pivote}']
-            matriz_xi[fila_pivote]=cabecera[columna_pivote-1]
+            matriz_xi[fila_pivote]=cabecera[columna_pivote-1]#xi entrante, xi saliente
 
-    def write_table(self,wind,cabecera,cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,columna_bj_xi,fila_pivote,columna_pivote):
+    def write_table(self,wind,cabecera,cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,columna_bj_xi,fila_pivote,columna_pivote,c_iteration):
         frame_salida = Frame(wind)
         ancho=7
         frame_salida.pack(fill='both', expand=True, padx=5, pady=5)
@@ -209,10 +216,12 @@ class Min:
             union_xi_cuerpo=[sub_a + sub_b  for sub_a, sub_b in zip(matriz_xi, cuerpo_restricciones)]
         else:
             union_xi_cuerpo=[sub_a + sub_b + sub_c for sub_a, sub_b, sub_c in zip(matriz_xi, cuerpo_restricciones,columna_bj_xi)]
-        for i in range(3):
-            Label(frame_salida, width=ancho).grid(row=1, column=i)
-            Label(frame_salida, width=ancho).grid(row=2, column=i)
-            c_columnas+=1
+        Label(frame_salida,text="Iteracion", width=ancho).grid(row=1, column=0)
+        Label(frame_salida,text="Xi",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=1)
+        Label(frame_salida,text=f"{c_iteration}", width=ancho).grid(row=1, column=1)
+        Label(frame_salida,text="C",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=2)
+        Label(frame_salida,text="", width=ancho).grid(row=2, column=2)
+        c_columnas+=3
         for i,item in enumerate(cabecera):
             Label(frame_salida,text=item[0],highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=c_columnas+i)
             Label(frame_salida,text=item[1],highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=c_columnas+i)
@@ -225,15 +234,21 @@ class Min:
                     color="white"
                 Label(frame_salida,text=self.formatear_numero(union_xi_cuerpo[i][j]),highlightbackground='black',highlightthickness=1,background=color, width=ancho).grid(row=3+i, column=j)
             row_count+=1
+        Label(frame_salida,text="Z",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=row_count, column=1)
         for i in range(len(fila_z)):
             Label(frame_salida,text=self.formatear_numero(fila_z[i]),highlightbackground='black',highlightthickness=1, width=ancho).grid(row=row_count, column=i+2)
         row_count+=1
+        Label(frame_salida,text="C-Z",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=row_count, column=2)
         for i in range(len(fila_c_z)):
             Label(frame_salida,text=self.formatear_numero(fila_c_z[i]),highlightbackground='black',highlightthickness=1, width=ancho).grid(row=row_count, column=i+3)
+            
     def segunda_fase(self,cuerpo_restricciones, matriz_xi):
         cabecera_fase_2=self.set_segunda_fase_cabecera();      
         cuerpo_segunda_fase=[]
         new_matriz_xi=[]
+        fase2 = Frame(self.salida, highlightbackground='red', highlightthickness=1)
+        fase2.pack(fill='both', expand=True, padx=5, pady=5)
+        Label(fase2, text="Fase 2 :", font=('arial', 10, 'bold')).pack()
         for row in cuerpo_restricciones:
             cuerpo_segunda_fase.append(row[:-self.c_artificial]) 
         for row in matriz_xi:

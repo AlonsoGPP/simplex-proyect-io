@@ -5,7 +5,7 @@ class ProblemInput:
     """
     Tiene los datos de FO en array, restricciones en matriz
     """
-    def __init__(self, type_op, wind, option_state:TKC, default_sign) -> None:
+    def __init__(self, type_op, wind, option_state, default_sign) -> None:
         #menu.gui_menu.withdraw()
         self.option_state=option_state
         self.gui_sum_menu_dim = wind
