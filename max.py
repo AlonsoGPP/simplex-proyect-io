@@ -5,7 +5,7 @@ import input
 class Max:
     def __init__(self):
         self.gui_sum_menu_dim = Toplevel()
-        self.input=input.ProblemInput(1,self.gui_sum_menu_dim, DISABLED, 1)
+        self.input=input.ProblemInput(1,self.gui_sum_menu_dim, DISABLED, MENOR_QUE)
         self.foot_frame=Frame(self.gui_sum_menu_dim)
         self.foot_frame.pack()
         self.fo_aumentada=None
@@ -15,12 +15,8 @@ class Max:
         self.restricciones = self.input.get_restriction_values()
         self.parse_restricciones_data()
         self.parse_fo_data()
-        matriz_xi=self.get_matriz_xi() 
-        self.simplex_operation(self.fo_aumentada,self.restricciones,matriz_xi)
-        # print(self.funcion_objetivo)
-        # print(self.fo_aumentada)
-        # print(self.restricciones)
-        # print(self.get_matriz_xi())
+        self.matriz_xi=self.get_matriz_xi() 
+        self.salida_resultado()
 
     def parse_restricciones_data(self):
         numero_restricciones=len(self.restricciones)
@@ -53,9 +49,52 @@ class Max:
         for i in range(longitud_parte_aumentada):
             matriz_valores_xi.append([fo_parte_aumentada[i], f"x{numero_varibles_fo+(i+1)}"])
         return matriz_valores_xi
-    def simplex_operation(self,c_fo_extendida, cuerpo_restricciones, matriz_xi):
-        
-        
+    def salida_resultado(self):
+        self.salida=Toplevel()
+        self.frame_menu_sum = Frame(self.salida, highlightbackground='red', highlightthickness=1)
+        self.frame_menu_sum.pack(fill='both', expand=True, padx=5, pady=5)
+        Label(self.frame_menu_sum, text="Resultado :", font=('arial', 10, 'bold')).pack()
+        self.simplex_operation(self.salida,self.fo_aumentada, self.restricciones,self.matriz_xi)
+        #self.write_table(self.salida,self.fo_aumentada, self.restricciones,self.matriz_xi)
+
+    def write_table(self,wind, c_fo_extendida,cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,columna_bj_xi,fila_pivote,columna_pivote):
+        frame_salida = Frame(wind)
+        ancho=7
+        frame_salida.pack(fill='both', expand=True, padx=5, pady=5)
+        c_columnas=0
+        union_xi_cuerpo=[sub_a + sub_b + sub_c for sub_a, sub_b, sub_c in zip(matriz_xi, cuerpo_restricciones,columna_bj_xi)]
+        for i in range(3):
+            Label(frame_salida, width=ancho).grid(row=1, column=i)
+            Label(frame_salida, width=ancho).grid(row=2, column=i)
+            c_columnas+=1
+        for i in range(len(c_fo_extendida)):
+            Label(frame_salida,text=c_fo_extendida[i],highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=c_columnas+i)
+            Label(frame_salida,text=f"x{i+1}",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=c_columnas+i)
+        row_count=3
+        for i in range(len(union_xi_cuerpo)):
+            for j in range(len(union_xi_cuerpo[0])):
+                if(i==fila_pivote and j == columna_pivote+2):
+                    color="red"
+                else:
+                    color="white"
+                Label(frame_salida,text=self.formatear_numero(union_xi_cuerpo[i][j]),highlightbackground='black',highlightthickness=1,background=color, width=ancho).grid(row=3+i, column=j)
+            row_count+=1
+        for i in range(len(fila_z)):
+            Label(frame_salida,text=self.formatear_numero(fila_z[i]),highlightbackground='black',highlightthickness=1, width=ancho).grid(row=row_count, column=i+2)
+        row_count+=1
+        for i in range(len(fila_c_z)):
+            Label(frame_salida,text=self.formatear_numero(fila_c_z[i]),highlightbackground='black',highlightthickness=1, width=ancho).grid(row=row_count, column=i+3)
+
+    def formatear_numero(self,numero) -> str:
+        if isinstance(numero, float):
+            return "{:.2f}".format(numero)
+        elif isinstance(numero, int):
+            return str(numero)
+        elif isinstance(numero, str):
+            return numero
+        else:
+            return str(numero) 
+    def simplex_operation(self,wind,c_fo_extendida, cuerpo_restricciones, matriz_xi):
         while True:
             fila_z=[]
             fila_c_z=[]
@@ -70,20 +109,27 @@ class Max:
             mayor_c_z=max(fila_c_z)
             if(mayor_c_z<=0):
                 #imprime ultima tabla
+                self.write_table(wind,c_fo_extendida, cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,[ [item] for item in columna_bj_xi if item is not None],fila_pivote,columna_pivote)
                 break
             columna_pivote=fila_c_z.index(mayor_c_z)+1
             columna_bj_xi=[]
             for row in cuerpo_restricciones:
+                if(row[columna_pivote]==0):
+                    row[columna_pivote]=-1
                 columna_bj_xi.append(row[0]/row[columna_pivote])
             positive_numbers_bj_xi = [num for num in columna_bj_xi if num > 0]
             if(positive_numbers_bj_xi==[]):
                 #imprimir solucion no acotada
+                messagebox.showinfo(message="Solucion no acotada", title="Sin solucion")
+                wind.destroy()
                 break
             menor_bj_xi = min(positive_numbers_bj_xi)
             
             fila_pivote = columna_bj_xi.index(menor_bj_xi) 
             pivote_multiplo=1/cuerpo_restricciones[fila_pivote][columna_pivote]
-            
+
+            self.write_table(wind,c_fo_extendida, cuerpo_restricciones,matriz_xi, fila_z,fila_c_z,[ [item] for item in columna_bj_xi],fila_pivote,columna_pivote)
+
             for i in range(len(cuerpo_restricciones[fila_pivote])):#esto se puede separar a una funcion
                 cuerpo_restricciones[fila_pivote][i]*=pivote_multiplo
             columna_pivote_temporal=[row[columna_pivote] for row in cuerpo_restricciones]#alamacenamos ya que se volvera 0 en nuestra matriz
@@ -91,11 +137,13 @@ class Max:
                 if(i is not fila_pivote):
                     for j in range(num_columns):
                          cuerpo_restricciones[i][j]-=columna_pivote_temporal[i]*cuerpo_restricciones[fila_pivote][j]
+            
             matriz_xi[fila_pivote]=[c_fo_extendida[columna_pivote-1],f'x{columna_pivote}']
-        print(c_fo_extendida)
-        print(cuerpo_restricciones)
-        print(fila_z)
-        print(matriz_xi)
+            
+        # print(c_fo_extendida)
+        # print(cuerpo_restricciones)
+        # print(fila_z)
+        # print(matriz_xi)
 
 
 

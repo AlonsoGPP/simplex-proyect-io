@@ -1,15 +1,16 @@
 from tkinter import Toplevel,Frame,Label, IntVar, OptionMenu, Button, StringVar, Entry, messagebox, ttk
+import tkinter.constants as TKC
 from enums import MAX, MAYOR_QUE, IGUAL, MENOR_QUE
 class ProblemInput:
     """
     Tiene los datos de FO en array, restricciones en matriz
     """
-    def __init__(self, type_op, wind, option_state, default_sign) -> None:
+    def __init__(self, type_op, wind, option_state:TKC, default_sign) -> None:
         #menu.gui_menu.withdraw()
         self.option_state=option_state
         self.gui_sum_menu_dim = wind
         self.default_sign=self.calcular_default_sign(default_sign) 
-        self.gui_sum_menu_dim.title("Ingreso Problemas")
+       
         #self.gui_sum_menu_dim.resizable(False, False)
         self.fo_values=[]#guarda datos
         self.fo_entries=[]#guarda entries
@@ -64,7 +65,7 @@ class ProblemInput:
         for i in range(numero_variables+2):#debido a que estamos agregando dos campos el combo y sa
             fila_restriccion_values.append(StringVar()) 
             if i ==numero_variables:
-                fila_restriccion_values[i].set("<=")
+                fila_restriccion_values[i].set(self.default_sign)
                 fila_restriccion_entries.append(ttk.Combobox(wind,textvariable=fila_restriccion_values[i], state=self.option_state,values=['<=','=','>='], width=3))
             else:
                 fila_restriccion_entries.append(Entry(wind,textvariable=fila_restriccion_values[i], width=4))
@@ -109,7 +110,7 @@ class ProblemInput:
                     fila_value.append(float(MENOR_QUE))
                elif valor_item == '=':
                    fila_value.append(float(IGUAL))
-               elif valor_item=='=>':
+               elif valor_item=='>=':
                    fila_value.append(float(MAYOR_QUE))
                else:
                    try:
