@@ -1,10 +1,11 @@
-from tkinter import Toplevel,Frame,Label, IntVar, Scrollbar,Canvas, Button, StringVar, Entry, messagebox, ttk
-from tkinter.constants import DISABLED,NORMAL,VERTICAL,BOTH,RIGHT,Y,LEFT,NONE
-from enums import MAYOR_QUE,MENOR_QUE,IGUAL
+from tkinter import Toplevel,Frame,Label, Scrollbar,Canvas, Button, messagebox 
+from tkinter.constants import DISABLED,VERTICAL,BOTH,RIGHT,Y,LEFT
+from enums import MENOR_QUE
 import input
 class Max:
     def __init__(self):
         self.gui_sum_menu_dim = Toplevel()
+        self.gui_sum_menu_dim.geometry("700x500")
         self.input=input.ProblemInput(1,self.gui_sum_menu_dim, DISABLED, MENOR_QUE)
         self.foot_frame=Frame(self.gui_sum_menu_dim)
         self.foot_frame.pack()
@@ -92,7 +93,7 @@ class Max:
         Label(frame_salida,text="Xi",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=1)
         Label(frame_salida,text=f"{c_iteration}", width=ancho).grid(row=1, column=1)
         Label(frame_salida,text="C",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=2)
-        Label(frame_salida,text="", width=ancho).grid(row=2, column=2)
+        Label(frame_salida,text="",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=2)
         c_columnas+=3
         for i in range(len(c_fo_extendida)):
             Label(frame_salida,text=c_fo_extendida[i],highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=c_columnas+i)

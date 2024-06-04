@@ -1,5 +1,5 @@
-from tkinter import Toplevel,Frame,Label, IntVar, OptionMenu, Button, StringVar, Entry, messagebox, ttk
-import tkinter.constants as TKC
+from tkinter import Frame,Label, Button, StringVar, Entry, messagebox, ttk
+
 from enums import MAX, MAYOR_QUE, IGUAL, MENOR_QUE
 class ProblemInput:
     """
@@ -27,8 +27,8 @@ class ProblemInput:
         
     def agregar_campos_fo_defecto(self):#x1 y x2
         self.fo_values.extend([StringVar(), StringVar()])
-        self.fo_entries.extend([Entry(self.frame_menu_sum, textvariable=self.fo_values[0], width=3),\
-                                Entry(self.frame_menu_sum, textvariable=self.fo_values[1], width=3)])
+        self.fo_entries.extend([Entry(self.frame_menu_sum, textvariable=self.fo_values[0], width=6),\
+                                Entry(self.frame_menu_sum, textvariable=self.fo_values[1], width=6)])
         self.columna=2
         for i in range(len(self.fo_entries)):
             
@@ -39,7 +39,7 @@ class ProblemInput:
     def add_variable(self):
         self.fo_values.append(StringVar())
         lastItem=len(self.fo_values)-1
-        self.fo_entries.append(Entry(self.frame_menu_sum, textvariable=self.fo_values[lastItem], width=3))
+        self.fo_entries.append(Entry(self.frame_menu_sum, textvariable=self.fo_values[lastItem], width=6))
         self.columna+=1
         self.fo_entries[lastItem].grid(row=3, column=self.columna)#imprime el ultimo elemento añadido
         self.columna+=1
@@ -68,7 +68,7 @@ class ProblemInput:
                 fila_restriccion_values[i].set(self.default_sign)
                 fila_restriccion_entries.append(ttk.Combobox(wind,textvariable=fila_restriccion_values[i], state=self.option_state,values=['<=','=','>='], width=3))
             else:
-                fila_restriccion_entries.append(Entry(wind,textvariable=fila_restriccion_values[i], width=4))
+                fila_restriccion_entries.append(Entry(wind,textvariable=fila_restriccion_values[i], width=6))
             
         self.restricciones_values.append(fila_restriccion_values)#añade fila
         self.restricciones_entries.append(fila_restriccion_entries)

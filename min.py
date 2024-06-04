@@ -1,10 +1,11 @@
-from tkinter import Toplevel,Frame,Label, IntVar, Canvas, Button, StringVar, Entry, messagebox, ttk,Scrollbar
-from tkinter.constants import DISABLED,NORMAL,VERTICAL,BOTH,RIGHT,Y,LEFT,NONE
+from tkinter import Toplevel,Frame,Label, Canvas, Button, messagebox,Scrollbar
+from tkinter.constants import VERTICAL,BOTH,RIGHT,Y,LEFT
 from enums import MAYOR_QUE,MENOR_QUE,IGUAL
 import input
 class Min:
     def __init__(self):
         self.gui_sum_menu_dim = Toplevel()
+        self.gui_sum_menu_dim.geometry("700x500")
         self.gui_sum_menu_dim.title("Ingreso Problemas")
         frame = Frame(self.gui_sum_menu_dim)
         frame.pack(fill=BOTH, expand=True)
@@ -155,6 +156,10 @@ class Min:
     def simplex_operation(self,wind,cabecera, cuerpo_restricciones, matriz_xi):
         c_iteration=0
         while True:
+            if(c_iteration>=25):#timeout
+                messagebox.showinfo(message="Bucle infinito: No se hallo solucion, tras 25 iteraciones", title="Error")
+                wind.destroy()
+                break
             c_iteration+=1
             fila_z=[]
             fila_c_z=[]
@@ -220,7 +225,7 @@ class Min:
         Label(frame_salida,text="Xi",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=1)
         Label(frame_salida,text=f"{c_iteration}", width=ancho).grid(row=1, column=1)
         Label(frame_salida,text="C",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=2)
-        Label(frame_salida,text="", width=ancho).grid(row=2, column=2)
+        Label(frame_salida,text="",highlightbackground='black',highlightthickness=1, width=ancho).grid(row=2, column=2)
         c_columnas+=3
         for i,item in enumerate(cabecera):
             Label(frame_salida,text=item[0],highlightbackground='black',highlightthickness=1, width=ancho).grid(row=1, column=c_columnas+i)
