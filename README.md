@@ -4,4 +4,4 @@ Software de desarrollo de problemas de programacion lineal , maximizacion y dos 
 
 | Descripción  | Descarga |
 | ------------- |:-------------:|
-| Simplex Solver      |[Simpler_solver.rar](https://github.com/AlonsoGPP/simplex-proyect-io/raw/main/ejecutable/SimplexSolver_ejecutable.rar)    |
+| Simplex Solver      |[Simplex_solver.rar](https://github.com/AlonsoGPP/simplex-proyect-io/raw/main/ejecutable/SimplexSolver_ejecutable.rar)    |
