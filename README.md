@@ -1,4 +1,4 @@
-## Descarga
+## Descarga Ejecutable
 
 Software de desarrollo de problemas de programacion lineal , maximizacion y dos fases, solucion paso a paso, desarrollado en python.
 
